@@ -55,5 +55,5 @@ npm start
 
 | Service | Port | Purpose |
 |----------|----------|----------|
-| Frontend (React) | 3000 | Customer-facing web application |
+| Frontend (Flutter) | 3000 | Customer-facing web application |
 | ML Service | 8080 |  |
