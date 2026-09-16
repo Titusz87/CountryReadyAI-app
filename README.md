@@ -31,8 +31,8 @@ Frontend
 
 Clone the repository:
    ```sh
-git clone https://github.com/Titusz87//roberta-ai-text-detector-app.git
-cd /roberta-ai-text-detector-app
+git clone https://github.com/Titusz87/CountryReadyAI-app.git
+cd /CountryReadyAI-app
    ```
 Configure the database connection in the backend application properties:
 ```sh
