@@ -1,0 +1,5 @@
+fastapi            #backend
+uvicorn[standard]  #server gateway interface 
+httpx              #let python make http requests       
+apscheduler        #handle scheduling 
+python-dotenv      #use .env files 
