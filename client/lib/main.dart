@@ -21,10 +21,10 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
       body: MapLibreMap(
         initialCameraPosition: const CameraPosition(
-          target: LatLng(-33.8688, 151.2093),
+          target: LatLng(-25.2744, 133.7751),
           zoom: 2.5,
         ),
-        styleString: 'https://demotiles.maplibre.org/style.json',
+        styleString: 'https://tiles.openfreemap.org/styles/dark',
       ),
         appBar: AppBar(
           title: const Text('CountryReady.ai'),
