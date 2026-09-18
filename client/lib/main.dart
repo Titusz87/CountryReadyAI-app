@@ -21,9 +21,11 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
       body: MapLibreMap(
         initialCameraPosition: const CameraPosition(
+          // Centers the map on Australia
           target: LatLng(-25.2744, 133.7751),
           zoom: 2.5,
         ),
+        // Uses the OpenFreeMap dark style for the map
         styleString: 'https://tiles.openfreemap.org/styles/dark',
       ),
         appBar: AppBar(
