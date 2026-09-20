@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
           title: const Text('CountryReady.ai'),
           centerTitle: true,
         ),
+        // Adds a bottom navigation bar with three destinations: Home, Incidents, and Profile
         bottomNavigationBar: NavigationBar(destinations: [
           NavigationDestination(
             icon: Icon(Icons.home),
