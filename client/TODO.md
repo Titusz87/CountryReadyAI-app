@@ -1,0 +1,4 @@
+- finish UI desing in Figma
+- implement it in flutter
+- add local sqlight db
+- add LLM container
