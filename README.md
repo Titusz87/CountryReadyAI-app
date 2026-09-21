@@ -43,13 +43,13 @@ spring.datasource.password=your_password
 
 Start the backend:
 ```sh
-mvn spring-boot:run
+cd backend
+uvicorn app.main:app --reload
 ```
 Start the frontend:
 ```sh
-cd frontend/client-application
-npm install
-npm start
+cd client
+flutter run
 ```
 ## Application Services
 
