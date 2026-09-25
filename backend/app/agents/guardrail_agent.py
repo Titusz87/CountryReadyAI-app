@@ -13,4 +13,4 @@ class WarningValidationAgent:
     def act(self, record: dict) -> bool:
         
         # Validates the warning record using the is_real_warning tool
-        return is_real_warning(record) s
+        return is_real_warning(record)
