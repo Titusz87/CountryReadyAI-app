@@ -56,4 +56,4 @@ flutter run
 | Service | Port | Purpose |
 |----------|----------|----------|
 | Frontend (Flutter) | 3000 | Customer-facing web application |
-| ML Service | 8080 |  |
+| Backend  (FastApi) | 8080 |  |
