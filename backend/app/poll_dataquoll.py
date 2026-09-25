@@ -1,6 +1,7 @@
 import httpx
 import os
 from dotenv import load_dotenv
+from app.agents.guardrail_agent import WarningValidationAgent
 
 #get API key from env file 
 load_dotenv(".env")
@@ -29,6 +30,19 @@ async def poll_dataquoll():
         response = await client.get(url, headers=headers, params=params)
         response.raise_for_status()
         data = response.json()
-        return data
+
+    records = data.get("features", [])
+
+    for r in records:
+        if "details" not in r:
+            print("MISSING DETAILS:", r)
+
+    agent = WarningValidationAgent()
+
+
+    # Filter records using the agent
+    valid_records = [record for record in records if agent.act(record)]
+
+    return valid_records
 
         

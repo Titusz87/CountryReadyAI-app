@@ -7,3 +7,5 @@
 # Ignore Python bytecode compilation files
 app/__pycache__/
 
+
+app/agents/tools/__pycache__/
