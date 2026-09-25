@@ -11,3 +11,4 @@ class Incident {
 
   const Incident({required this.id, required this.title, required this.type, this.severity, this.latitude, this.longitude, this.startTime, this.endTime, this.status});
 }
+

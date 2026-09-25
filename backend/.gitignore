@@ -1,1 +1,9 @@
+# secret info stored in .env
 .env
+
+# virtual environment
+.venv/
+
+# Ignore Python bytecode compilation files
+app/__pycache__/
+
