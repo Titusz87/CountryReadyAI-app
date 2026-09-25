@@ -1,11 +1,9 @@
-# Agent tool to parse the warning text and determine if it is a real warning or not.
-
 import re
 from datetime import datetime
 
 def is_real_warning(record: dict) -> bool:
     """
-    Determines if the warning is real based on the provided record.
+    Agent tool to determine if the warning is real based on the provided record.
 
     Args:
         record (dict): A dictionary containing the warning details.
@@ -13,6 +11,8 @@ def is_real_warning(record: dict) -> bool:
     Returns:
         bool: True if the warning is real, False otherwise.
     """
+
+    # Ensures authorised warnings only per Assessment criteria:  "Never invent or replace official warnings"
     description = record["details"]["description"]
     alert_level = extract_alert_level(description)
 
@@ -22,7 +22,7 @@ def is_real_warning(record: dict) -> bool:
     if record.get("status") != "active":
         return False
     
-    if parse_time(record["details"]["expires"]) < now():
+    if datetime.datetime.strptime(record["details"]["expires"], "%Y-%m-%d %H:%M:%S") < datetime.datetime.now():
         return False
     
     return True

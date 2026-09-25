@@ -1,7 +1,3 @@
-# This deterministic agent ensures to meet the criteria of:
-# "The platform must support authorised warnings - it must never invent or
-#  replace official emergency instructions." 
-
 from app.agents.tools.is_real_warning import is_real_warning
 
 class WarningValidationAgent:
