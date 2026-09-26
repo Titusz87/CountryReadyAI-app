@@ -36,9 +36,7 @@ cd /CountryReadyAI-app
    ```
 Configure the database connection in the backend application properties:
 ```sh
-spring.datasource.url=jdbc:postgresql://localhost:5432/
-spring.datasource.username=postgres 
-spring.datasource.password=your_password
+
 ```
 
 Start the backend:
