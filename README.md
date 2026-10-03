@@ -1,4 +1,4 @@
-# CountryReady.ai
+# CountryReady.AI
 
 
 <!-- ABOUT THE PROJECT -->
