@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:maplibre_gl/maplibre_gl.dart';
+import 'screens/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,36 +18,7 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: Scaffold(
-      body: MapLibreMap(
-        initialCameraPosition: const CameraPosition(
-          // Centers the map on Australia
-          target: LatLng(-25.2744, 133.7751),
-          zoom: 2.5,
-        ),
-        // Uses the OpenFreeMap dark style for the map
-        styleString: 'https://tiles.openfreemap.org/styles/dark',
-      ),
-        appBar: AppBar(
-          title: const Text('CountryReady.ai'),
-          centerTitle: true,
-        ),
-        // Adds a bottom navigation bar with three destinations: Home, Incidents, and Profile
-        bottomNavigationBar: NavigationBar(destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.warning),
-            label: 'Incidents',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],)
-      ),
+      home: const LoginPage(),
     );
   }
 }
