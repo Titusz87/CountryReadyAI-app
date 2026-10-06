@@ -33,6 +33,7 @@ class HouseholdDashboard extends StatelessWidget {
             HouseholdHeader(),
 
             SizedBox(height: 20),
+            /*
 
             CurrentAlertCard(),
 
@@ -41,7 +42,7 @@ class HouseholdDashboard extends StatelessWidget {
             HouseholdStatusCard(),
 
             SizedBox(height: 16),
-            /*
+            
 
             PreparednessCard(),
 
