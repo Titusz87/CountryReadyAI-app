@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:maplibre_gl/maplibre_gl.dart';
+import '../../widgets/community_leader/active_incidents_card.dart';
+import '../../widgets/community_leader/household_status_card.dart';
+import '../../widgets/community_leader/community_alert_card.dart';
+import '../../widgets/community_leader/community_tasks_card.dart';
 
 class LeaderDashboard extends StatelessWidget {
   const LeaderDashboard({super.key});
@@ -12,16 +15,30 @@ class LeaderDashboard extends StatelessWidget {
         centerTitle: true,
       ),
 
-      body: MapLibreMap(
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(-25.2744, 133.7751),
-          zoom: 2.5,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: const [
+            ActiveIncidentsCard(),
+            SizedBox(height: 16),
+
+/*
+            HouseholdStatusCard(),
+            SizedBox(height: 16),
+
+            CommunityAlertCard(),
+            SizedBox(height: 16),
+
+            CommunityTasksCard(),
+      */
+          ],
         ),
-        styleString: 'https://tiles.openfreemap.org/styles/dark',
       ),
 
       bottomNavigationBar: NavigationBar(
-        destinations: const [
+        selectedIndex: 0,
+        destinations: [
           NavigationDestination(
             icon: Icon(Icons.warning),
             label: 'Incidents',
