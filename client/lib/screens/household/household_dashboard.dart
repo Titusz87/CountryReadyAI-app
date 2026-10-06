@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../widgets/household/household_header.dart';
+import '../../widgets/household/current_alert_card.dart';
+import '../../widgets/household/household_status_card.dart';
+import '../../widgets/household/preparedness_card.dart';
+import '../../widgets/household/community_updates_card.dart';
 //import 'package:maplibre_gl/maplibre_gl.dart';
 
 class HouseholdDashboard extends StatelessWidget {
@@ -20,7 +25,35 @@ class HouseholdDashboard extends StatelessWidget {
         styleString: 'https://tiles.openfreemap.org/styles/dark',
       ),
 */
+     body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: const [
+            HouseholdHeader(),
+
+            SizedBox(height: 20),
+
+            CurrentAlertCard(),
+
+            SizedBox(height: 16),
+
+            HouseholdStatusCard(),
+
+            SizedBox(height: 16),
+            /*
+
+            PreparednessCard(),
+
+            SizedBox(height: 16),
+
+            CommunityUpdatesCard(),
+            */
+          ],
+        ),
+      ),
       bottomNavigationBar: NavigationBar(
+        selectedIndex: 0,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home),
