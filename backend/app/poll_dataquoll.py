@@ -3,6 +3,16 @@ import os
 from dotenv import load_dotenv
 import json
 
+#-------vars------------------------------------------------
+polled_incidents = []
+states = ["nsw", "vic", "qld", "wa", "sa", "tas", "act", "nt"]
+event_types = set()
+statuses = set()
+warning_levels = set()
+API_KEY = None 
+verbose_debug = False
+
+#-------classes------------------------------------------------
 class Incident:
     def __init__(self, id, properties):
         self.id = id
@@ -20,40 +30,40 @@ class Incident:
         self.description = properties["details"].get("description")
         self.address = properties["location"].get("address")
 
+        if verbose_debug:
+            print(f"Created Incident {self.id}")
+            self.check_values_set()
+
     #vars is a dict of all object fields 
     def check_values_set(self):
-        print(self.id)
         for attribute, value in vars(self).items():
             if value is None:
-                print(f"{attribute} is not set")
-        print("\n")
+                print(f"\t{attribute} is not set")
 
-  
 
-#-------local vars------------------------------------------------
-polled_incidents = []
-states = ["nsw", "vic", "qld", "wa", "sa", "tas", "act", "nt"]
-event_types = set()
-statuses = set()
-warning_levels = set()
+#--------functions----------------------------------------
 
-#----------------------------------------------------------
+#this fn runs when the server starts. Sets .env vars
+def setup_polling():
+    print("Setting .env variables...")
+    
+    #get API key from env file 
+    global API_KEY
+    load_dotenv(".env")
+    API_KEY = os.getenv("Authorization")
+    
+    #check the key is set properly 
+    if not API_KEY:
+        raise RuntimeError("Dataquoll api key is not set")
+    else:
+        print("Successfully set Dataquoll api key")
 
-#---------------------------------------------------------
-#get API key from env file 
-load_dotenv(".env")
-API_KEY = os.getenv("Authorization")
-#check the key is set properly 
-if not API_KEY:
-    raise RuntimeError("dataquoll api key is not set")
-#-----------------------------------------------------------
 async def poll_all_states():
     for s in states:
-        await poll_dataquoll_by_state(s)
-        print(f"Polled state: {s}")
-
+        print(f"Polling state: {s}")
+        incidents = await poll_dataquoll_by_state(s)
+        print(f"Recorded {len(incidents)} incidents\n")
     update_attribute_sets()
-    return "hey"
 
 #get state data from dataquoll api
 async def poll_dataquoll_by_state(state):
@@ -77,20 +87,22 @@ async def poll_dataquoll_by_state(state):
         response.raise_for_status()
         
         data = response.json()    #this is a python dictionary  
-        create_json_objects(data) #sort out our json objects
+        state_incidents = create_incident_objects(data) #sort out our json objects
+    return state_incidents
 
-        return data
-
-def create_json_objects(data):
+def create_incident_objects(data):
     features = data["features"]
+    state_incidents = []
     for feature in features:
         #grab these 2 json chunks and create incident object
         id = feature["id"]
         properties = feature["properties"]
         incident = Incident(id, properties)
 
-        #incident.check_values_set()
+        #add to all polled incidents and state specific dictionary
         polled_incidents.append(incident)
+        state_incidents.append(incident)
+    return state_incidents
         
 def update_attribute_sets():
     for i in polled_incidents:
@@ -98,9 +110,10 @@ def update_attribute_sets():
         statuses.add(i.status)
         warning_levels.add(i.warning_level)
 
-    print(f"Event Types: {event_types}")
-    print(f"Statuses: {statuses}")
-    print(f"Warning Levels: {warning_levels}")
+    print("Collected possible values:")
+    print(f"\tEvent Types: {event_types}")
+    print(f"\tStatuses: {statuses}")
+    print(f"\tWarning Levels: {warning_levels}")
 
 
         
