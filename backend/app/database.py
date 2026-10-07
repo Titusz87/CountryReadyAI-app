@@ -1,37 +1,45 @@
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy import text
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Session
+from app.models import Base
 
-#DeclarativeBase is an sqlalchemy class the we inherit from to create our table classes 
-class Base(DeclarativeBase):
-    pass
+DATABASE_URL = None
+engine = None 
 
-class User(Base):
-    __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
-    email: Mapped[str]
-    age: Mapped[int | None]
+#create url that the app will use to connect to the db
+def connect_to_db():
+    #access .env values to create url
+    load_dotenv(".env")   
+    DB_USER = os.environ['DB_USER']
+    DB_PASSWORD = os.environ['DB_PASSWORD']
+    DB_NAME = os.environ['DB_NAME']
 
+    if not (DB_USER and DB_PASSWORD and DB_NAME):
+        raise RuntimeError("DB_USER and DB_PASSWORD and DB_NAME are not set in .env")
+    
+    #create url with env vars- to connect to db
+    global DATABASE_URL
+    DATABASE_URL = (
+        f"postgresql+psycopg://"
+        f"{DB_USER}:{DB_PASSWORD}"
+        f"@localhost:5432/{DB_NAME}"
+    )
 
-# create url that the app will use to connect to the db
-# access .env values to create url
-load_dotenv(".env")
-DATABASE_URL = (
-    f"postgresql+psycopg://"
-    f"{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}"
-    f"@localhost:5432/{os.environ['DB_NAME']}"
-)
+    #create engine to be used for sessions 
+    global engine 
+    engine = create_engine(DATABASE_URL)
 
-#use sqalchemy to create engine and create session 
-engine = create_engine(DATABASE_URL)
-with Session(engine) as session:
-    user = User(name="Evan", email="evan@example.com")
-    session.add(user)
-    session.commit()
+    #create all tables if they don't exit
+    Base.metadata.create_all(engine)
+
+    print("Successfully connected to database")
+
+#this is called by table classes when they do db fn's 
+def get_session():
+    if not engine:
+        raise RuntimeError("Engine not created before session started")
+    return Session(engine)
+
+    
 
