@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../widgets/household/household_header.dart';
+import '../../widgets/guess_mode/guess_mode_header.dart';
 import '../../widgets/household/current_alert_card.dart';
 import '../../widgets/household/household_status_card.dart';
 import '../../widgets/household/preparedness_card.dart';
@@ -8,8 +8,8 @@ import '../login_page.dart';
 
 //import 'package:maplibre_gl/maplibre_gl.dart';
 
-class HouseholdDashboard extends StatelessWidget {
-  const HouseholdDashboard({super.key});
+class GuessModeDashboard extends StatelessWidget {
+  const GuessModeDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class HouseholdDashboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: const [
-            HouseholdHeader(),
+            GuessModeHeader(),
 
             SizedBox(height: 20),
             /*

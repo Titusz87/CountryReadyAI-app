@@ -40,11 +40,12 @@ class LoginPage extends StatelessWidget {
               icon: const Icon(Icons.home),
               label: const Text('Continue as Household'),
               onPressed: () {
-                Navigator.pushReplacement(
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const HouseholdDashboard(),
                   ),
+                  (route) => false,
                 );
               },
             ),
@@ -55,11 +56,12 @@ class LoginPage extends StatelessWidget {
               icon: const Icon(Icons.groups),
               label: const Text('Continue as Community Leader'),
               onPressed: () {
-                Navigator.pushReplacement(
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const LeaderDashboard(),
                   ),
+                  (route) => false,
                 );
               },
             ),
