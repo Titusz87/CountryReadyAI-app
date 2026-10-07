@@ -1,1 +1,23 @@
-#TODO
+services:
+  db:
+    image: postgres:17
+    container_name: countryready-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${DB_NAME}            #when postgresql is installed, create a database called 'countryready' (value from the .env)
+      POSTGRES_USER: ${DB_USER}          #values stored in the .env file 
+      POSTGRES_PASSWORD: ${DB_PASSWORD} 
+
+    ports:
+      - "5432:5432"   
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data #docker decides where all the db files live (they can cause clutter)
+
+#Create/manage a named volume called postgres_data
+volumes:
+  postgres_data:
+
+
+#python application (app) will eventually need to be in this file as well 
