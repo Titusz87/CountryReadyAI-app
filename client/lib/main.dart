@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/login_page.dart';
+import 'screens/guess_mode/guess_mode_dashboard.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: const LoginPage(),
+      home: const GuessModeDashboard(),
     );
   }
 }
