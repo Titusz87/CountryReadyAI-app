@@ -1,5 +1,10 @@
-- finish UI desing in Figma
-- implement it in flutter
+TIBOR
+
+- fix admin and user ui bugs; no map view, and profile icon doesnt work after logging in
 - add local sqlight db
-- think about multi agent workflow
-- add agent(s)
+
+
+STEPHEN
+
+- when we have the endpoint, list incidents into card widgets: - "screens/guess_mode/guess_mode_dashboard.dart"
+                                                               - "screens/household/household_dashboard.dart"
