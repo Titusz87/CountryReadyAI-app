@@ -1,16 +1,19 @@
 import httpx
 import os
 from dotenv import load_dotenv
-import json
+from app.routers.items import write_incidents_to_db
 
 #-------vars------------------------------------------------
-polled_incidents = []
 states = ["nsw", "vic", "qld", "wa", "sa", "tas", "act", "nt"]
+
 event_types = set()
 statuses = set()
 warning_levels = set()
+unset_values = set()
+
 API_KEY = None 
 verbose_debug = False
+#polling_finished = asyncio.Event() #we need this to track whether it's currently polling or not so other scripts can pull data
 
 #-------classes------------------------------------------------
 class Incident:
@@ -22,13 +25,13 @@ class Incident:
         self.state = properties["location"]["state"]
         self.latitude = properties["location"]["latitude"]
         self.longitude = properties["location"]["longitude"]
-        self.reported_time = properties["timestamps"]["reported"]
         self.last_updated = properties["timestamps"]["updated"]
         
-        #these fields may not have any data and probably shouldn't be used 
+        #these fields may not have any data 
         self.expires = properties["details"].get("expires")
         self.description = properties["details"].get("description")
         self.address = properties["location"].get("address")
+        self.reported_time = properties["timestamps"].get("reported")
 
         if verbose_debug:
             print(f"Created Incident {self.id}")
@@ -36,17 +39,17 @@ class Incident:
 
     #vars is a dict of all object fields 
     def check_values_set(self):
+        count = 0
         for attribute, value in vars(self).items():
             if value is None:
-                print(f"\t{attribute} is not set")
+                #print(f"\t{attribute} is not set")
+                unset_values.add(attribute)
 
 
 #--------functions----------------------------------------
 
 #this fn runs when the server starts. Sets .env vars
 def setup_polling():
-    print("Setting .env variables...")
-    
     #get API key from env file 
     global API_KEY
     load_dotenv(".env")
@@ -55,16 +58,26 @@ def setup_polling():
     #check the key is set properly 
     if not API_KEY:
         raise RuntimeError("Dataquoll api key is not set")
-    else:
-        print("Successfully set Dataquoll api key")
+    print("Successfully set Dataquoll api key")
 
+#this fn is called from main.py
 async def poll_all_states():
+    incidents = []
     for s in states:
         print(f"Polling state: {s}")
-        incidents = await poll_dataquoll_by_state(s)
-        print(f"Recorded {len(incidents)} incidents\n")
-    update_attribute_sets()
+        state_incidents = await poll_dataquoll_by_state(s)
+        print(f"\tRecorded {len(state_incidents)} incidents")
+        for i in state_incidents:
+            incidents.append(i)
 
+    #get more info about dataquoll data if we want 
+    if verbose_debug:
+        update_attribute_sets(incidents)
+
+    #done now, so write new polled data to db
+    write_incidents_to_db(incidents)
+
+    
 #get state data from dataquoll api
 async def poll_dataquoll_by_state(state):
     #construct the command "curl "https://dataquoll.io/api/v1/incidents" -H "Authorization: Bearer YOUR_API_KEY"
@@ -92,7 +105,7 @@ async def poll_dataquoll_by_state(state):
 
 def create_incident_objects(data):
     features = data["features"]
-    state_incidents = []
+    incident_objects = []
     for feature in features:
         #grab these 2 json chunks and create incident object
         id = feature["id"]
@@ -100,12 +113,11 @@ def create_incident_objects(data):
         incident = Incident(id, properties)
 
         #add to all polled incidents and state specific dictionary
-        polled_incidents.append(incident)
-        state_incidents.append(incident)
-    return state_incidents
+        incident_objects.append(incident)
+    return incident_objects
         
-def update_attribute_sets():
-    for i in polled_incidents:
+def update_attribute_sets(incidents):
+    for i in incidents:
         event_types.add(i.event_type)
         statuses.add(i.status)
         warning_levels.add(i.warning_level)
@@ -114,6 +126,8 @@ def update_attribute_sets():
     print(f"\tEvent Types: {event_types}")
     print(f"\tStatuses: {statuses}")
     print(f"\tWarning Levels: {warning_levels}")
+    print(f"\tUnset Values: {unset_values}")
+
 
 
         

@@ -2,16 +2,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.poll_dataquoll import poll_all_states, setup_polling
+from app.database import connect_to_db
 
 #this code runs when the server is created 
 #'asynccontextmanager' decorator makes 'lifespan' fn work as a context manager  
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     #one time setup stuff runs here 
+    connect_to_db()
     setup_polling()
     await poll_all_states() #poll immediately on startup for testing
-    #setup db 
-    #setup anything else
+    #setup anything else here
     
     #create scheduler and set it to automatically poll every 2 minutes 
     scheduler = AsyncIOScheduler()
@@ -34,6 +35,7 @@ async def root():
 
 #use this to test functionalities 
 @app.get("/test")
-async def root():
-    return {"message": "test"}
+async def test():
+    message = await poll_all_states()
+    return {"message": message}
 
