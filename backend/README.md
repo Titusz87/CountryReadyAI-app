@@ -8,4 +8,5 @@ Then. run the commands to start server on localhost
 ```bash
 uvicorn app.main:app --reload
 ```
+To stop server: Ctrl C
 

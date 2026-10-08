@@ -1,7 +1,8 @@
 import httpx
 import os
 from dotenv import load_dotenv
-from app.routers.items import write_incidents_to_db
+from datetime import datetime
+from app.routers.items import update_database_incidents
 
 #-------vars------------------------------------------------
 states = ["nsw", "vic", "qld", "wa", "sa", "tas", "act", "nt"]
@@ -13,25 +14,36 @@ unset_values = set()
 
 API_KEY = None 
 verbose_debug = False
-#polling_finished = asyncio.Event() #we need this to track whether it's currently polling or not so other scripts can pull data
+write_to_db = True
 
 #-------classes------------------------------------------------
 class Incident:
     def __init__(self, id, properties):
-        self.id = id
-        self.event_type = properties["eventType"]
-        self.status = properties["status"]
-        self.warning_level = properties["warningLevel"]
-        self.state = properties["location"]["state"]
-        self.latitude = properties["location"]["latitude"]
-        self.longitude = properties["location"]["longitude"]
-        self.last_updated = properties["timestamps"]["updated"]
-        
-        #these fields may not have any data 
-        self.expires = properties["details"].get("expires")
-        self.description = properties["details"].get("description")
-        self.address = properties["location"].get("address")
-        self.reported_time = properties["timestamps"].get("reported")
+        try:
+            self.id = id
+            self.event_type = properties["eventType"]
+            self.status = properties["status"]
+            self.warning_level = properties["warningLevel"]
+            self.state = properties["location"]["state"]
+            self.latitude = properties["location"]["latitude"]
+            self.longitude = properties["location"]["longitude"]
+            self.last_updated = datetime.fromisoformat(properties["timestamps"]["updated"]) #we need to create time variables for some fields 
+            
+            #these fields may not have any data     
+            self.description = properties["details"].get("description") #.get() is used for safety
+            self.address = properties["location"].get("address")
+            self.reported_time = (
+                        datetime.fromisoformat(properties["timestamps"]["reported"])  #if there is a value given, save it as a datetime otherwise it's None
+                        if properties["timestamps"].get("reported")
+                        else None
+                    )
+            self.expires = (
+                        datetime.fromisoformat(properties["details"]["expires"]) 
+                        if properties["details"].get("expires")
+                        else None
+                        )
+        except Exception as e:
+            print("Error creating Incident object from polling")
 
         if verbose_debug:
             print(f"Created Incident {self.id}")
@@ -72,10 +84,11 @@ async def poll_all_states():
 
     #get more info about dataquoll data if we want 
     if verbose_debug:
-        update_attribute_sets(incidents)
+        print_attribute_sets(incidents)
 
-    #done now, so write new polled data to db
-    write_incidents_to_db(incidents)
+    #done now, so write new polled data to db if we want
+    if write_to_db:
+        update_database_incidents(incidents)
 
     
 #get state data from dataquoll api
@@ -116,7 +129,7 @@ def create_incident_objects(data):
         incident_objects.append(incident)
     return incident_objects
         
-def update_attribute_sets(incidents):
+def print_attribute_sets(incidents):
     for i in incidents:
         event_types.add(i.event_type)
         statuses.add(i.status)
