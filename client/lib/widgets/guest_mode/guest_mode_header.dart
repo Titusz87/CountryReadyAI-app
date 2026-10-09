@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class GuessModeHeader extends StatelessWidget {
-  const GuessModeHeader({super.key});
+class GuestModeHeader extends StatelessWidget {
+  const GuestModeHeader({super.key});
 
   @override
   Widget build(BuildContext context) {

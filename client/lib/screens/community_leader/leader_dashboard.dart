@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../map_screen.dart';
 import '../../widgets/community_leader/active_incidents_card.dart';
 import '../../widgets/community_leader/household_status_card.dart';
 import '../../widgets/community_leader/community_alert_card.dart';
@@ -38,6 +39,16 @@ class LeaderDashboard extends StatelessWidget {
 
       bottomNavigationBar: NavigationBar(
         selectedIndex: 0,
+         onDestinationSelected: (index) {
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MapScreen(),
+        ),
+      );
+    }
+  },
         destinations: [
           NavigationDestination(
             icon: Icon(Icons.warning),
