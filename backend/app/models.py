@@ -27,13 +27,16 @@ class Incident(Base):
     description: Mapped[str | None]
     address: Mapped[str | None]
 
-#these 2 tables inherit from the incident class
+#these 3 tables inherit from the incident class
 #Current_Incident stores the incidents that are in progress
 class Current_Incident(Incident):
     __tablename__ = "current_incidents"
 #keep incidents that are no longer active for our records
 class Archived_Incident(Incident):
     __tablename__ = "archived_incidents"
+#this one is handy
+class Temporary_Incident(Incident):
+    __tablename__ = "temporary_incidents"
 
 #stores info of community leaders  
 class Community_Leader(Base):

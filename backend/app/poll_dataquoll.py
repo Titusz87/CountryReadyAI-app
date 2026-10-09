@@ -75,12 +75,19 @@ def setup_polling():
 #this fn is called from main.py
 async def poll_all_states():
     incidents = []
+    print("Polling...")
     for s in states:
-        print(f"Polling state: {s}")
+        if verbose_debug:
+            print(f"Polling state: {s}")
+        
         state_incidents = await poll_dataquoll_by_state(s)
-        print(f"\tRecorded {len(state_incidents)} incidents")
+        
+        if verbose_debug:
+            print(f"\tRecorded {len(state_incidents)} incidents")
+        
         for i in state_incidents:
             incidents.append(i)
+    print(f"Polled {len(incidents)} incidents from states: {states}")
 
     #get more info about dataquoll data if we want 
     if verbose_debug:
