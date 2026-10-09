@@ -95,7 +95,7 @@ flutter:
 
 flutter_native_splash:
   color: "#ffffff" #  splash background color
-  image: lib/assets/images/logo.jpg # Path to splash image
+  image: lib/assets/images/app/logo.jpg # Path to splash image
   
   # platform-specific overrides
   android: true
@@ -104,9 +104,9 @@ flutter_native_splash:
   android_12:
     color: "#FFFFFF"
     # 2. Path to your logo for Android 12 through Android 15:
-    image: lib/assets/images/logo.jpg
+    image: lib/assets/images/app/logo.jpg
 
 flutter_launcher_icons:
   android: true     
   ios: true
-  image_path: "lib/assets/images/launcher_icon.jpg" 
+  image_path: "lib/assets/images/app/launcher_icon.jpg" 
