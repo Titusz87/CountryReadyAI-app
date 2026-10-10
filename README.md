@@ -1,4 +1,4 @@
-# CountryReady.AI
+# CountryReady
 
 
 <!-- ABOUT THE PROJECT -->
@@ -7,7 +7,7 @@
 
 
 ### Features
--agentic
+
 ### Built With
 
 Backend
