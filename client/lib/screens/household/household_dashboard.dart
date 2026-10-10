@@ -18,15 +18,6 @@ class HouseholdDashboard extends StatelessWidget {
         title: const Text('CountryReady.ai'),
         centerTitle: true,
       ),
-/*
-      body: MapLibreMap(
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(-25.2744, 133.7751),
-          zoom: 2.5,
-        ),
-        styleString: 'https://tiles.openfreemap.org/styles/dark',
-      ),
-*/
      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
