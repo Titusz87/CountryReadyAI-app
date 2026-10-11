@@ -153,7 +153,6 @@ def update_database_incidents(incidents):
         write_list_to_db(session, insert_incidents)
         print(f"Added {len(insert_incidents)} new incidents to {models.Current_Incident.__tablename__}")
         
-
         #we can now check whether any fields have been updated from 'current_incidents' using common_incident_ids
         updated = current_incidents_changed_statuses(session, common_incidents_ids)
         print(f"{len(updated)} incidents have changed statues to inform users")
