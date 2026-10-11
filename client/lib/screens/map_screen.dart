@@ -14,6 +14,7 @@ class MapScreen extends StatelessWidget {
 
       body: MapLibreMap(
         initialCameraPosition: const CameraPosition(
+          // Centered on Australia
           target: LatLng(-25.2744, 133.7751),
           zoom: 2.5,
         ),
