@@ -40,6 +40,7 @@ class LoginPage extends StatelessWidget {
               icon: const Icon(Icons.home),
               label: const Text('Continue as Household'),
               onPressed: () {
+                // pushRenoveUntil is used to clear stack tracking
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
