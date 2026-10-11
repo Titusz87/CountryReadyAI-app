@@ -3,10 +3,13 @@ from app.database import get_session
 from sqlalchemy.orm import Session
 from sqlalchemy import delete
 from sqlalchemy import select
+from datetime import datetime, timezone
 
-verbose_debug = False
+verbose_debug = True
 monitor_incident_tables = True
 testing_mode = False 
+possible_warning_levels = ['advice', 'none', 'watch_and_act']
+possible_statuses = ['completed', 'safe', 'active', 'controlled', 'contained']
 
 #----------basic read write logic-------------------------------------
 #convert incidents between our python class and table class after polling
@@ -59,19 +62,20 @@ def get_all_rows(session, model):
         print(f"Failed to get table from db: {e}")
 
 #get rows by filtering a table by it's fields 
-#input a dictionary of 'field -> value' ie 'key -> value'
-def get_db_rows_by_fields(session, model, fields):
-    try:
-        query = select(model)
-        for field, value in fields.items():
-            query = query.where(getattr(model, field) == value) #narrows down the list of table objects every time it runs 
-        rows = session.execute(query).scalars().all()
+#input a dictionary like {field: value}
+def get_db_rows_by_all_fields(session, model, fields):
+    query = select(model)
 
-        if verbose_debug:
-            print(f"Selected {len(query)} rows from {model.__tablename__} table where {fields}")
-        return rows
-    except Exception as e:
-        print(f"Failed to retrieve db rows based on fields")
+    for field, value in fields.items():
+        query = query.where(getattr(model, field) == value) #every time it runs the list gets narrowed down
+    rows = session.execute(query).scalars().all()
+
+    if verbose_debug:
+        print(
+            f"Selected {len(rows)} rows from "
+            f"{model.__tablename__} table where {fields}"
+        )
+    return rows
 
 #return all the id's from a table
 def get_ids_from_table(session, model):
@@ -125,26 +129,22 @@ def update_database_incidents(incidents):
     
     #need to turn our incidents class into proper table objects before writing them to db
     #we need to compare the ids of things because they are unique (objects may not be)
-    new_incidents = convert_incidents_orm_objects(incidents, models.Temporary_Incident) #these are 'Temporary_Incidents(s)'
+    new_incidents = convert_incidents_orm_objects(incidents, models.Temporary_Incident) 
     new_incident_ids = [incident.id for incident in new_incidents] 
     
     with get_session() as session:
-        #we need to store the new incidents in a temporary table for logic later (the temporary_incidents is empty)
+        
+        #we need to store the new incidents in a temporary table for logic later (the temporary_incidents should be empty)
         write_list_to_db(session, new_incidents)           #writes to temporary_incidents
         print(f"Added {len(new_incidents)} new incidents to {models.Temporary_Incident.__tablename__}")
 
-        if monitor_incident_tables:
-            get_table_info(session, models.Temporary_Incident)
-            get_table_info(session, models.Current_Incident)
-            get_table_info(session, models.Archived_Incident)
+        print_incidents_info(session)
         
-        #get the previous incidents and their ids 
-        previous_incidents = get_all_rows(session, models.Current_Incident)
-        previous_incident_ids = get_ids_from_table(session, models.Current_Incident)
+        existing_incident_ids = get_ids_from_table(session, models.Current_Incident)
         
         #incidents ids that are in common can't be inserted into 'current_incidents'because they already exist
         #they need to be checked to see if the incidents have updated  
-        common_incidents_ids = set(new_incident_ids) & set(previous_incident_ids) #only sets have special operations like '&' and '-' (because they don't have repeated values)
+        common_incidents_ids = set(new_incident_ids) & set(existing_incident_ids) 
 
         #we now insert the incidents that are actually new into the current_incidents (not old ones that have been updated)
         insert_incidents_ids = set(new_incident_ids) - common_incidents_ids 
@@ -154,43 +154,68 @@ def update_database_incidents(incidents):
         print(f"Added {len(insert_incidents)} new incidents to {models.Current_Incident.__tablename__}")
         
         #we can now check whether any fields have been updated from 'current_incidents' using common_incident_ids
-        updated = current_incidents_changed_statuses(session, common_incidents_ids)
-        print(f"{len(updated)} incidents have changed statues to inform users")
+        #updates is a nested dictionary like this -> { id: { field: new status } }  
+        notification_fields  = ["status", "warning_level", "latitude", "longitude", "description", "address"]
+        user_updates = current_incidents_changed_values(session, common_incidents_ids, notification_fields )
+        print(f"{len(user_updates)} incidents have changed statues to inform users")
+        if verbose_debug:
+            print(f"Updated incidents: {user_updates}")
+        update_incident_table(session, models.Current_Incident, user_updates) 
 
+        #many incidents will also have an updated 'last_updated' value which also needs to be written
+        timestamp_updates = current_incidents_changed_values(session, common_incidents_ids, ["last_updated"])
+        update_incident_table(session, models.Current_Incident, timestamp_updates)
+        print(f"{len(timestamp_updates)} incidents have had timestamp updates")
 
-        #TODO now we can move expired ones to archived  
+        #now we get any incidents that have expired or had their statuses changed to 'completed'
+        expired_incidents = get_expired_incidents(session, models.Current_Incident)
+        completed_incidents = get_db_rows_by_all_fields(session, models.Current_Incident, {"status": "completed"})
+        print(f"{len(expired_incidents)} incidents have expired")
+        print(f"{len(completed_incidents)} incidents have expired")
+
+        #remove expired and completed incidents from current_incidents and add them to archived_incidents
+        expired_incident_ids = [incident.id for incident in expired_incidents] 
+        completed_incident_ids = [incident.id for incident in completed_incidents]
+        remove_incidents_ids = set(expired_incident_ids) | set(completed_incident_ids)
+        remove_incidents = get_rows_from_ids(session, models.Current_Incident, remove_incidents_ids)
+        delete_db_rows(session, remove_incidents)
+        print(f"Removed {len(remove_incidents)} from current_incidents")
+
+        #append the deleted rows to archived_incidents
+        archived_incidents = convert_incidents_orm_objects(remove_incidents, models.Archived_Incident)
         
-        #if new incident has been updated, the record needs to also be updated
-
+        #TODO the archived table needs to be checked to make sure the same incident isn't inserted twice 
+        
+        write_list_to_db(session, archived_incidents)
 
         #we are done with temp table
         flush_db_table(session, models.Temporary_Incident)
-        #print results and commit
-        if monitor_incident_tables:
-                    get_table_info(session, models.Temporary_Incident)
-                    get_table_info(session, models.Current_Incident)
-                    get_table_info(session, models.Archived_Incident)
+        
+        #print table info and commit
+        print_incidents_info(session)
         session.commit()
 
 #this can be pushed to users 
-def check_for_expired_incidents(session):
-    possible_statuses = ['completed', 'safe', 'active', 'controlled', 'contained']
-    possible_warning_levels = ['advice', 'none', 'watch_and_act']
-    completed = []
+def get_expired_incidents(session, model):
+    check = get_all_rows(session, model)
+    expired = []
+    time_now = datetime.now(timezone.utc)
 
-    check = get_all_rows(session, models.Current_Incident)
     for incident in check:
-        if incident.status == 'completed':
-            completed.append(incident)
-    
-    return completed
+        if incident.expires == None:
+            break 
+        expiry_time =  incident.expires 
+        if expiry_time < time_now:
+            expired.append(incident)
+
+    return expired
 
 #check for status/warning level changes
-def current_incidents_changed_statuses(session, checklist_ids):
-    updated = []
+def current_incidents_changed_values(session, checklist_ids, check_fields):
+    updated = {}
 
     #get the rows from the 2 tables to be checked for updates
-    old_incidents = get_rows_from_ids(session, models.Current_Incident, checklist_ids) #these are objects
+    old_incidents = get_rows_from_ids(session, models.Current_Incident, checklist_ids) 
     new_incidents = get_rows_from_ids(session, models.Temporary_Incident, checklist_ids)
 
     #create 2 dictionaries for easy look up and comparison
@@ -204,13 +229,35 @@ def current_incidents_changed_statuses(session, checklist_ids):
     #compare fields
     for id, old_incident in old_incident_by_id.items():
         new_incident = new_incident_by_id[id]
+        changed_fields = {}
 
-        #the fields we want to check can be added here
-        if old_incident.status != new_incident.status or old_incident.warning_level != new_incident.warning_level:
-           updated.append(old_incident)
+        for field in check_fields:
+            old_value = getattr(old_incident, field)
+            new_value = getattr(new_incident, field)
+            if old_value != new_value:
+                changed_fields[field] = new_value
 
-    #we can return more data if we want. Like what fields have changed
+        if changed_fields:
+            updated[id] = changed_fields
+
     return updated
+
+def update_incident_table(session, model, updates):
+    #extract the rows to update by their ids (the keys from updates)
+    updated_rows = get_rows_from_ids(session, model, list(updates))
+
+    #remember updates are like this -> { id: { field: new status } }
+    for row in updated_rows:
+        updated_fields = updates[row.id]
+        
+        for field, new_value in updated_fields.items():
+            setattr(row, field, new_value)
+
+def print_incidents_info(session):
+    get_table_info(session, models.Temporary_Incident)
+    get_table_info(session, models.Current_Incident)
+    get_table_info(session, models.Archived_Incident)
+
 
 #create row in household table
 def create_household():
