@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
+      // Every user in Guest mode by default
       home: const GuestModeDashboard(),
     );
   }
