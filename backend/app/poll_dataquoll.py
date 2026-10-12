@@ -2,7 +2,7 @@ import httpx
 import os
 from dotenv import load_dotenv
 from datetime import datetime
-from app.routers.items import update_database_incidents
+from app.services.incident_sync import update_database_incidents
 
 #-------vars------------------------------------------------
 states = ["nsw", "vic", "qld", "wa", "sa", "tas", "act", "nt"]
@@ -15,6 +15,8 @@ unset_values = set()
 API_KEY = None 
 verbose_debug = False
 write_to_db = True
+
+auto_poll_interval = 2
 
 #-------classes------------------------------------------------
 class Incident:

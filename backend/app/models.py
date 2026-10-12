@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from datetime import datetime 
 from sqlalchemy import DateTime
+from sqlalchemy import Integer
 
 #--------------table classes (define how to read and write objects to db)------------------------------
 
@@ -41,15 +42,24 @@ class Temporary_Incident(Incident):
 #stores info of community leaders  
 class Community_Leader(Base):
     __tablename__ = "community_leaders"
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True) #auto generate integer ids 
     name: Mapped[str]
     latitude: Mapped[float] 
     longitude: Mapped[float] 
 
+#people can be households, community leaders or both
+class People(Base):
+    __tablename__ = "people"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True) 
+    latitude: Mapped[float] 
+    longitude: Mapped[float]  
+    household_id: Mapped[int | None]                         #these ids are the primary keys from other tables
+    community_leader_id: Mapped[int | None] 
+
 #stores info of individual households (users)
 class Household(Base):
     __tablename__ = "households"
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str]
     latitude: Mapped[float] 
     longitude: Mapped[float] 
@@ -57,7 +67,7 @@ class Household(Base):
 #this table store the community info that is created by community leaders
 class Community_Profile(Base):
     __tablename__ = "community_profiles"
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
 #we need to remember which incidents affect which people
 class Affected_Households(Base):
