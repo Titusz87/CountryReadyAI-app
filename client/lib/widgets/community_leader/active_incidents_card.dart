@@ -24,7 +24,7 @@ class ActiveIncidentsCard extends StatelessWidget {
             const Text('2 active incidents'),
 
             const SizedBox(height: 20),
-
+// get incident endpoint data
             _IncidentItem(
               icon: '🔴',
               title: 'Bushfire',
