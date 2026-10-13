@@ -11,7 +11,7 @@ class GuestModeHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             Text(
-              'Hello, you are in Guess mode.',
+              'Hello, you are in Guest mode.',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -19,7 +19,7 @@ class GuestModeHeader extends StatelessWidget {
             ),
 
             SizedBox(height: 4),
-
+            // get location from gps
             Text(
               '📍 Broome, WA · Yawuru',
               style: TextStyle(
