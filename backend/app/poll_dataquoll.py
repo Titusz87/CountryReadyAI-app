@@ -16,7 +16,6 @@ API_KEY = None
 verbose_debug = False
 write_to_db = True
 
-auto_poll_interval = 2
 
 #-------classes------------------------------------------------
 class Incident:
@@ -66,7 +65,6 @@ class Incident:
 def setup_polling():
     #get API key from env file 
     global API_KEY
-    load_dotenv(".env")
     API_KEY = os.getenv("Authorization")
     
     #check the key is set properly 

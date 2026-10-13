@@ -10,8 +10,7 @@ SessionLocal = None
 
 #create url that the app will use to connect to the db
 def connect_to_db():
-    #access .env values to create url
-    load_dotenv(".env")   
+    #access .env values to create url 
     DB_USER = os.getenv('DB_USER')
     DB_PASSWORD = os.getenv('DB_PASSWORD')
     DB_NAME = os.getenv('DB_NAME')

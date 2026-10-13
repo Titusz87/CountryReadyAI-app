@@ -3,3 +3,6 @@
 #Compiled files
 **/__pycache__/
 *.pyc
+
+#secret folder
+secrets/ 

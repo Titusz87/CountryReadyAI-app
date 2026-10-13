@@ -3,13 +3,15 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from datetime import datetime 
 from sqlalchemy import DateTime
-from sqlalchemy import Integer
+from sqlalchemy import Integer, ForeignKey, String
 
 #--------------table classes (define how to read and write objects to db)------------------------------
 
 #DeclarativeBase is an sqlalchemy class the we inherit from to create our table classes 
 class Base(DeclarativeBase):
     pass
+
+#---------------incident classes------------------------------------------------
 
 #stores the info of current incidents 
 class Incident(Base):
@@ -39,6 +41,19 @@ class Archived_Incident(Incident):
 class Temporary_Incident(Incident):
     __tablename__ = "temporary_incidents"
 
+#-------------identifier classes--------------------------------------------------------
+
+#people can be households, community leaders or both. fcm token is for pushing notifications to devices
+#this is a simple setup where people to devices is one-to-one
+class People(Base):
+    __tablename__ = "people"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    fcm_token: Mapped[str | None] = mapped_column(String, unique=True, nullable=True) #can be null because the user might not allow notifications immediately  
+    latitude: Mapped[float] 
+    longitude: Mapped[float]  
+    household_id: Mapped[int | None] = mapped_column(ForeignKey("households.id"), nullable=True)                        
+    community_leader_id: Mapped[int | None] = mapped_column(ForeignKey("community_leaders.id"), nullable=True)
+
 #stores info of community leaders  
 class Community_Leader(Base):
     __tablename__ = "community_leaders"
@@ -47,15 +62,6 @@ class Community_Leader(Base):
     latitude: Mapped[float] 
     longitude: Mapped[float] 
 
-#people can be households, community leaders or both
-class People(Base):
-    __tablename__ = "people"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True) 
-    latitude: Mapped[float] 
-    longitude: Mapped[float]  
-    household_id: Mapped[int | None]                         #these ids are the primary keys from other tables
-    community_leader_id: Mapped[int | None] 
-
 #stores info of individual households (users)
 class Household(Base):
     __tablename__ = "households"
@@ -63,6 +69,8 @@ class Household(Base):
     name: Mapped[str]
     latitude: Mapped[float] 
     longitude: Mapped[float] 
+
+#-------------------------------------------------------------------------------------------------
 
 #this table store the community info that is created by community leaders
 class Community_Profile(Base):

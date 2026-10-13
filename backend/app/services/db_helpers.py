@@ -92,8 +92,8 @@ def flush_db_table(session, model):
     try:
         session.execute(delete(model))
 
-        if verbose_debug:
-            print(f"Prepared all rows from {model.__tablename__} to be deleted")
+
+        print(f"Prepared all rows from {model.__tablename__} to be deleted")
     except Exception as e:
         print(f"Failed to flush db table: {e}")
 
