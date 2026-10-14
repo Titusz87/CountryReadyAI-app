@@ -18,13 +18,12 @@ class ActiveIncidentsCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            // Make a /incidents endpoint call here and lost them
             const SizedBox(height: 4),
 
             const Text('2 active incidents'),
 
             const SizedBox(height: 20),
-// get incident endpoint data
+// Make a /incidents endpoint call here and list them
             _IncidentItem(
               icon: '🔴',
               title: 'Bushfire',
