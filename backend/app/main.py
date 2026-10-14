@@ -2,18 +2,18 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from app.poll_dataquoll import poll_all_states, setup_polling
-from app.firebase import initialise_firebase, firebase_test_notification
+from app.services.poll_dataquoll import poll_all_states, setup_polling
+from app.services.firebase import initialise_firebase, firebase_test_notification
 from app.database import connect_to_db, get_session
 from app.routers.registration import router as registration_router
 #from app.routers.something_else import router as something_else
 from app.services import db_helpers as db
 from app import models
 
-#--------------control vars------------------------------------------
+#--------------config vars------------------------------------------
 
 auto_poll = False
-poll_on_startup = False
+poll_on_startup = True
 auto_poll_interval = 2
 flush_db_models = [models.People]
 test_firebase_notification_system = False

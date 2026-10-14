@@ -2,6 +2,9 @@ from sqlalchemy import delete
 from sqlalchemy import select
 from app.database import get_session
 
+
+#-------config-------------------------------------
+
 verbose_debug = False
 
 

@@ -1,4 +1,3 @@
-from app.routers import registration
 from app.models import People
 from app.database import get_session
 import app.services.db_helpers as db 

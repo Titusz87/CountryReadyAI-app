@@ -4,12 +4,17 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 import app.services.db_helpers as db
 
+
+#---------------------config---------------------------------
+
 verbose_debug = False
-monitor_incident_tables = True
-testing_mode = False 
+
+#-------------------------------info-----------------------------------------
+
 possible_warning_levels = ['advice', 'none', 'watch_and_act']
 possible_statuses = ['completed', 'safe', 'active', 'controlled', 'contained']
 
+#----------------------------------------------------------------------------------
 
 #this fn is called from the polling script
 #this is complicated. Please don't touch it!
@@ -83,7 +88,7 @@ def update_database_incidents(incidents):
         session.commit()
 
 
-# This can be pushed to users
+#This can be pushed to users
 def get_expired_incidents(session, model):
     check = db.get_all_rows(session, model)
     expired = []
