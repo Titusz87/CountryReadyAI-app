@@ -1,6 +1,8 @@
-# Ignore the .env file containing environment variables
 .env
 
-# Compiled files
+#Compiled files
 **/__pycache__/
 *.pyc
+
+#secret folder
+secrets/ 

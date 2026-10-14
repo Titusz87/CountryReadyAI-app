@@ -1,0 +1,107 @@
+from sqlalchemy import delete
+from sqlalchemy import select
+from app.database import get_session
+
+verbose_debug = False
+
+
+#----------helpers-------------------------------------
+#convert incidents between our python class and table class after polling
+def convert_incidents_orm_objects(incidents, incident_type):
+    translated = []
+    for incident in incidents:
+        current_incident = incident_type(
+            id = incident.id,
+            event_type = incident.event_type,
+            status = incident.status, 
+            warning_level = incident.warning_level, 
+            state = incident.state,
+            latitude = incident.latitude, 
+            longitude = incident.longitude, 
+            reported_time = incident.reported_time,
+            last_updated = incident.last_updated,
+            expires = incident.expires,
+            description = incident.description, 
+            address = incident.address
+        )
+        translated.append(current_incident)
+    return translated
+
+#postgresql can insert any mixed list of table objects into db easily
+def write_list_to_db(session, objects):
+    try:
+        session.add_all(objects)  
+        if verbose_debug:
+            print(f"Added {len(objects)} objects to db session")
+    except Exception as e:
+        print(f"Failed to write objects to db: {e}")
+
+#delete row by inputting a table_object list 
+def delete_db_rows(session, rows):
+    try:
+        for row in rows:
+            session.delete(row)
+
+        if verbose_debug:
+            print(f"Prepared {len(rows)} rows to be deleted")
+    except Exception as e:
+        print(f"Failed to delete rows from db: {e}")
+
+#reading is the opposite process 
+def get_all_rows(session, model):
+    try:
+        result = session.execute(select(model))
+        return result.scalars().all()                     #scalars turns row into objects. Returned objects are detached when session closes 
+    except Exception as e:
+        print(f"Failed to get table from db: {e}")
+
+#get rows by filtering a table by it's fields 
+#input a dictionary like {field: value}
+def get_db_rows_by_all_fields(session, model, fields):
+    query = select(model)
+
+    for field, value in fields.items():
+        query = query.where(getattr(model, field) == value) #every time it runs the list gets narrowed down
+    rows = session.execute(query).scalars().all()
+
+    if verbose_debug:
+        print(
+            f"Selected {len(rows)} rows from "
+            f"{model.__tablename__} table where {fields}"
+        )
+    return rows
+
+#return all the id's from a table
+def get_ids_from_table(session, model):
+    try:
+        result = session.execute(select(model.id)) #id is always the primary key in our tables
+        return result.scalars().all()
+    except Exception as e:
+        print(f"Failed to get ids from table {model.__tablename__}: {e}")
+
+#sort of the opposite of 'get_ids'
+def get_rows_from_ids(session, model, ids):
+    try:
+        result = session.execute(select(model).where(model.id.in_(ids))) 
+        return result.scalars().all()
+    except Exception as e:
+        print(f"Failed to get the rows from table {model.__tablename__} by their ids: {e}")
+
+#wipe all the rows from a table
+def flush_db_table(session, model):
+    try:
+        session.execute(delete(model))
+
+
+        print(f"Prepared all rows from {model.__tablename__} to be deleted")
+    except Exception as e:
+        print(f"Failed to flush db table: {e}")
+
+#return any wanted info about tables for debugging
+def print_table_info(session, model):
+    try:
+        current_incidents = get_all_rows(session, model)
+        print(f"Size of {model.__tablename__} table: {len(current_incidents)}")
+    except Exception as e:
+        print(f"Failed to get table info: {e}")    
+
