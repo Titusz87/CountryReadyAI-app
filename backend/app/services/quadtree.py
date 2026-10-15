@@ -200,8 +200,8 @@ class Quadtree:
         return nearby
 
     class IncidentPoint:
-        def __init__(self, latitude, longitude, incident_id):
+        def __init__(self, latitude, longitude, id):
             self.latitude = latitude
             self.longitude = longitude
-            self.incident_id = incident_id
+            self.id = id
 

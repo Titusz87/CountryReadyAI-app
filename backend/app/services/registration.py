@@ -1,4 +1,4 @@
-from app.models import People
+from app.models import People, People_Incident
 from app.database import get_session
 import app.services.db_helpers as db 
 
@@ -14,10 +14,14 @@ def create_person(latitude, longitude):
             community_leader_id = None
         )
         db.write_list_to_db(session, [person])
+        session.flush()                         #ensure the value is in the table before we use it again
+        
+        #now also create an entry in people_incidents to track incidents a person is 'subscribed' to
+        people_incident = People_Incident(id = person.id, incident_ids=[])
+        
+        session.add(people_incident)
         session.commit()
         return person.id
-
-
 
 #create row in household table
 def create_household():

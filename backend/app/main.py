@@ -3,21 +3,23 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.services.poll_dataquoll import poll_all_states, setup_polling
+from app.services.incident_sync import custom_quadtree
 from app.services.firebase import initialise_firebase, firebase_test_notification
 from app.database import connect_to_db, get_session
 from app.routers.registration import router as registration_router
 #from app.routers.something_else import router as something_else
 from app.services import db_helpers as db
 from app import models
+from app.services.create_db_rows import create_random_people
 
 #--------------config vars------------------------------------------
 
 auto_poll = False
 poll_on_startup = True
 auto_poll_interval = 2
-flush_db_models = [models.People]
 test_firebase_notification_system = False
-
+flush_db_models = [models.People, models.People_Incident]
+create_db_people = 100
 
 #------------------------------------------------------------------
 
@@ -30,19 +32,15 @@ async def lifespan(app: FastAPI):
     initialise_firebase()
     connect_to_db()
     setup_polling()
-    if poll_on_startup:
-        await poll_all_states() #poll immediately on startup for testing
     do_additional_db_jobs()
     do_additional_firebase_jobs()
+    if poll_on_startup:
+        await poll_all_states() #poll immediately on startup for testing
     
-    #create scheduler and set it to automatically poll every 2 minutes 
+    #schedule polling (and database sync/ push notifications)
     scheduler = AsyncIOScheduler()
     if auto_poll:
-        scheduler.add_job(
-            poll_all_states,
-            "interval",
-            minutes=auto_poll_interval
-        )
+        scheduler.add_job(poll_all_states, "interval", minutes=auto_poll_interval)
     scheduler.start()
     yield
     scheduler.shutdown()
@@ -60,11 +58,18 @@ def root():
 #can do database stuff here
 def do_additional_db_jobs():
     with get_session() as session:
-        
+
+        #options to flush tables
         if not flush_db_models:
             for model in flush_db_models:
                 db.flush_db_table(session, model)
                 db.print_table_info(session, model)
+
+        #option to randomly create db data
+        if create_db_people > 0:
+            create_random_people(create_db_people)
+
+        
         session.commit()
 
 def do_additional_firebase_jobs():

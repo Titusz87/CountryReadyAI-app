@@ -9,6 +9,8 @@ class StartupRequest(BaseModel):
     latitude: float
     longitude: float
 
+#-------------------------------------------------------------------------
+
 #this is the route that runs ONCE when a device connects for the first time (to give the device a unique id)
 @router.post("/first-app-launch")
 def first_app_launch(data: StartupRequest):
