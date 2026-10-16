@@ -21,7 +21,6 @@ def initialise_firebase():
     return firebase_admin.initialize_app(cred)
 
 def firebase_test_notification():
-
     message = messaging.Message(
         notification=messaging.Notification(
             title="Test Notification",
@@ -30,6 +29,21 @@ def firebase_test_notification():
         
         token="REPLACE_WITH_REAL_FCM_TOKEN"
     )
-
     response = messaging.send(message)
-    print(f"Notification sent successfully! Message ID: {response}")
+    print(f"Test notification sent successfully! Message ID: {response}")
+
+#use try catch when calling this fn in case it fails 
+def send_firebase_notification(_title, _body, _token, _data):
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title=_title,
+            body=_body
+        ),
+        data=_data,
+        token=_token
+    )
+    response = messaging.send(message)
+    return response
+
+
+
