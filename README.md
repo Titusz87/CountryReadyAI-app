@@ -1,4 +1,4 @@
-# !!Find a name
+# EchoGround
 
 
 <!-- ABOUT THE PROJECT -->
