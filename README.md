@@ -4,7 +4,7 @@
 <!-- ABOUT THE PROJECT -->
 ### About The Project
 
-
+An Offline-First Platform for Community Information Sharing and Emergency Preparedness 
 
 ### Features
 
